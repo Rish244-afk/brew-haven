@@ -1,31 +1,90 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Jost:wght@200;300;400;500;600&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --cream: #F5F0E8;
-  --parchment: #EDE5D4;
-  --latte: #C9A96E;
-  --espresso: #2A1F14;
-  --dark: #1A1208;
-  --mid: #6B5744;
-  --light-mid: #9C826A;
-  --white: #FDFAF5;
+@layer base {
+  body {
+    @apply bg-[#FDFAF5] text-[#2A1F14] antialiased selection:bg-[#C9A96E] selection:text-[#1A1208];
+  }
 }
 
-body {
-  background-color: var(--cream);
-  color: var(--espresso);
-  font-family: 'Jost', sans-serif;
-  font-weight: 300;
-  line-height: 1.7;
-  overflow-x: hidden;
+/* ── LUXURY ANIMATION KEYFRAMES & UTILITIES ── */
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(2deg); }
 }
 
-h1, h2, h3, h4, .font-serif {
-  font-family: 'Cormorant Garamond', Georgia, serif;
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.4; filter: blur(20px); }
+  50% { opacity: 0.8; filter: blur(30px); }
+}
+
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-float {
+  animation: float 5s ease-in-out infinite;
+}
+
+.animate-spin-slow {
+  animation: spinSlow 20s linear infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 4s ease-in-out infinite;
+}
+
+/* Glassmorphism Luxury Styling */
+.glass-panel {
+  background: rgba(26, 18, 8, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(201, 169, 110, 0.25);
+}
+
+.glass-panel-light {
+  background: rgba(253, 250, 245, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(201, 169, 110, 0.3);
+}
+
+/* Gold Gradient Text */
+.text-gradient-gold {
+  background: linear-[#C9A96E] gradient;
+  background-image: linear-gradient(135deg, #F4E8D0 0%, #C9A96E 50%, #9E7D42 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Shimmer Light Beam Effect */
+.shimmer-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-container::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0,
+    rgba(255, 255, 255, 0.15) 20%,
+    rgba(255, 255, 255, 0.35) 60%,
+    rgba(255, 255, 255, 0)
+  );
+  animation: shimmer 3s infinite;
+  content: '';
 }
 
 /* Custom Scrollbar */
@@ -40,45 +99,5 @@ h1, h2, h3, h4, .font-serif {
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #e6c88b;
-}
-
-/* Custom Utilities */
-.btn-luxury {
-  @apply relative inline-block font-sans text-[0.72rem] font-medium tracking-[0.2em] uppercase px-9 py-3.5 border border-current cursor-pointer bg-transparent transition-all duration-300 overflow-hidden text-center;
-}
-
-.btn-dark {
-  @apply text-espresso border-espresso hover:bg-espresso hover:text-cream;
-}
-
-.btn-light {
-  @apply text-cream border-cream hover:bg-cream hover:text-dark;
-}
-
-.btn-gold {
-  @apply text-latte border-latte hover:bg-latte hover:text-dark;
-}
-
-/* Eyebrow Label */
-.eyebrow {
-  @apply font-sans text-[0.68rem] font-medium tracking-[0.25em] uppercase text-latte flex items-center gap-3;
-}
-
-.eyebrow-line::before {
-  content: '';
-  @apply block w-8 h-[1px] bg-latte;
-}
-
-/* Glassmorphism */
-.glass-panel {
-  background: rgba(26, 18, 8, 0.92);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(201, 169, 110, 0.15);
-}
-
-.glass-card {
-  background: rgba(253, 250, 245, 0.85);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(201, 169, 110, 0.2);
+  background: #EAE0D0;
 }
