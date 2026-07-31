@@ -38,7 +38,7 @@ export function Navbar() {
     { name: "Order", href: "/menu" },
     { name: "Gift", href: "/about" },
     { name: "Pay", href: "/checkout" },
-    { name: "Store", href: "/contact" },
+    { name: "Store", href: "/store" },
   ];
 
   const isAdminRoute = pathname.startsWith("/admin");
