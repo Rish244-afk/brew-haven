@@ -18,7 +18,7 @@ export async function PATCH(
 
     const updated = await prisma.contactMessage.update({
       where: { id },
-      data: { isRead: Boolean(body.isRead) },
+      data: { read: Boolean(body.read ?? body.isRead) },
     });
 
     return NextResponse.json(updated);

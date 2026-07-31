@@ -89,25 +89,45 @@ export default function BrewHavenPayPage() {
     setAuthStep("profile_form");
   };
 
-  const handleProfileFormSubmit = (e: React.FormEvent) => {
+  const handleProfileFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!firstName || !lastName || !email || !birthDate) return;
 
-    const updated: CustomerProfile = {
-      ...profile,
-      mobile: profile?.mobile || mobileInput || "9876543210",
-      firstName,
-      lastName,
-      email,
-      birthDate,
-      referralCode,
-      cardBalance: profile?.cardBalance || 0,
-      stars: profile?.stars || 120,
-    };
+    const currentMobile = profile?.mobile || mobileInput || "9876543210";
 
-    setProfile(updated);
-    localStorage.setItem("brew_haven_customer", JSON.stringify(updated));
-    setAuthStep("dashboard");
+    try {
+      const res = await fetch("/api/auth/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mobile: currentMobile,
+          firstName,
+          lastName,
+          email,
+          birthDate,
+          referralCode,
+        }),
+      });
+
+      const data = await res.json();
+      const updatedCustomer = data.customer || {
+        mobile: currentMobile,
+        firstName,
+        lastName,
+        email,
+        birthDate,
+        referralCode,
+        cardBalance: profile?.cardBalance || 0,
+        stars: profile?.stars || 120,
+      };
+
+      setProfile(updatedCustomer);
+      localStorage.setItem("brew_haven_customer", JSON.stringify(updatedCustomer));
+      setAuthStep("dashboard");
+    } catch (err) {
+      console.error("Profile save error:", err);
+      setAuthStep("dashboard");
+    }
   };
 
   const handleLoadCard = () => {

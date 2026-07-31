@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, User, CheckCircle2, Sparkles, ArrowRight, Smartphone } from "lucide-react";
+import { X, User, CheckCircle2, Sparkles, ArrowRight, Smartphone, LogOut } from "lucide-react";
 
 interface CustomerAuthModalProps {
   isOpen: boolean;
@@ -15,6 +15,7 @@ export function CustomerAuthModal({ isOpen, onClose }: CustomerAuthModalProps) {
   const [receivedOtp, setReceivedOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [customerData, setCustomerData] = useState<any>(null);
 
   if (!isOpen) return null;
 
@@ -44,36 +45,46 @@ export function CustomerAuthModal({ isOpen, onClose }: CustomerAuthModalProps) {
     }
   };
 
-  const handleOtpSubmit = (e: React.FormEvent) => {
+  const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (otp !== receivedOtp && otp !== "1234") {
-      setErrorMsg("Incorrect OTP code. Please enter the OTP sent to your number.");
-      return;
-    }
-
     setIsLoading(true);
     setErrorMsg("");
 
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const res = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mobile: mobileNumber, otp }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "OTP Verification Failed");
+
+      setCustomerData(data.customer);
+      // Save customer session persistently in localStorage
+      localStorage.setItem("brew_haven_customer", JSON.stringify(data.customer));
+
       setStep("success");
-      // Save customer session in localStorage
-      localStorage.setItem(
-        "brew_haven_customer",
-        JSON.stringify({ mobile: mobileNumber, stars: 120 })
-      );
-    }, 600);
+    } catch (err: any) {
+      setErrorMsg(err.message || "Invalid OTP code");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSignOut = () => {
+    localStorage.removeItem("brew_haven_customer");
+    setCustomerData(null);
+    setStep("phone");
+    setMobileNumber("");
+    setOtp("");
+    setReceivedOtp("");
+    setErrorMsg("");
+    onClose();
   };
 
   const resetAndClose = () => {
     onClose();
-    setTimeout(() => {
-      setStep("phone");
-      setMobileNumber("");
-      setOtp("");
-      setReceivedOtp("");
-      setErrorMsg("");
-    }, 300);
   };
 
   return (
@@ -225,25 +236,48 @@ export function CustomerAuthModal({ isOpen, onClose }: CustomerAuthModalProps) {
           </form>
         )}
 
-        {/* STEP 3: SUCCESSFUL LOGIN */}
+        {/* STEP 3: SUCCESSFUL LOGIN & PERSISTENT SESSION */}
         {step === "success" && (
-          <div className="text-center py-6 space-y-4">
+          <div className="text-center py-4 space-y-4 font-sans">
             <div className="w-16 h-16 bg-[#103E2E]/10 rounded-full flex items-center justify-center text-[#103E2E] mx-auto">
               <Sparkles className="w-8 h-8" />
             </div>
             <h2 className="font-serif text-3xl font-bold text-[#103E2E]">
-              Welcome Back!
+              Account Verified!
             </h2>
             <p className="text-xs text-mid max-w-xs mx-auto">
-              Signed in as <strong className="text-espresso">+91 {mobileNumber}</strong>. You have{" "}
-              <span className="text-latte font-bold">120 Haven Stars 🌟</span> ready to redeem on your next order.
+              Signed in as <strong className="text-espresso">+91 {mobileNumber}</strong>. Your profile data and rewards are saved in our database.
             </p>
-            <button
-              onClick={resetAndClose}
-              className="w-full py-3.5 bg-[#103E2E] text-cream rounded-full font-semibold text-xs tracking-wider uppercase hover:bg-espresso transition-all"
-            >
-              Start Ordering
-            </button>
+
+            <div className="bg-parchment/60 p-4 rounded-2xl border border-latte/30 text-left text-xs space-y-2">
+              <div className="flex justify-between">
+                <span className="text-mid">Phone Account:</span>
+                <span className="font-mono font-bold text-[#103E2E]">+91 {mobileNumber}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-mid">Haven Stars Balance:</span>
+                <span className="font-bold text-latte">120 Stars 🌟</span>
+              </div>
+            </div>
+
+            <div className="space-y-2 pt-2">
+              <a
+                href="/pay"
+                onClick={resetAndClose}
+                className="w-full block py-3.5 bg-[#103E2E] text-cream rounded-full font-semibold text-xs tracking-wider uppercase hover:bg-espresso transition-all shadow-md"
+              >
+                Go to My Brew Haven Pay & Cards
+              </a>
+
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className="w-full text-center text-xs text-red-600 hover:underline py-1 flex items-center justify-center gap-1"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Sign Out / Switch Account</span>
+              </button>
+            </div>
           </div>
         )}
       </div>

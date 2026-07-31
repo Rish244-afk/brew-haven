@@ -46,6 +46,7 @@ export async function POST(req: Request) {
         status: paymentMethod === "cod" ? "pending_cash" : "paid",
         stripeSessionId: `session_${fallbackOrderId}`,
         createdAt: new Date(),
+        updatedAt: new Date(),
         items: validated.items.map((i, index) => ({
           id: `item_${index}`,
           orderId: fallbackOrderId,

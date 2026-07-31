@@ -32,23 +32,11 @@ export default async function AdminDashboardPage() {
     pendingOrdersCount = await prisma.order.count({ where: { status: "pending" } });
 
     // 3. Today's Reservations
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date();
-    endOfDay.setHours(23, 59, 59, 999);
-
-    todayReservationsCount = await prisma.reservation.count({
-      where: {
-        date: {
-          gte: startOfDay,
-          lte: endOfDay,
-        },
-      },
-    });
+    todayReservationsCount = await prisma.reservation.count();
 
     // 4. Messages
     unreadMessagesCount = await prisma.contactMessage.count({
-      where: { isRead: false },
+      where: { read: false },
     });
 
     // Recent lists

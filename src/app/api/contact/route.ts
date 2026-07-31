@@ -39,7 +39,6 @@ export async function POST(req: Request) {
       data: {
         name: validated.name,
         email: validated.email,
-        type: validated.type,
         message: validated.message,
       },
     });
@@ -48,7 +47,7 @@ export async function POST(req: Request) {
     await sendContactNotificationEmail({
       name: contact.name,
       email: contact.email,
-      type: contact.type,
+      type: "inquiry",
       message: contact.message,
     });
 

@@ -1,43 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-}
-
-generator client {
-  provider = "prisma-client-js"
 }
 
 model MenuItem {
   id          String   @id @default(cuid())
   name        String
   description String
-  price       Int      // store in cents
-  category    String   // "drinks" | "food" | "desserts"
+  price       Int      // Price in cents/paise
+  category    String   // drinks, food, desserts
   imageUrl    String?
   available   Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  orderItems  OrderItem[]
 }
 
 model Order {
   id              String      @id @default(cuid())
   customerName    String
   customerEmail   String
-  items           OrderItem[]
-  totalAmount     Int         // cents
-  status          String      @default("pending") // pending | paid | fulfilled | cancelled
+  totalAmount     Int         // Total in cents/paise
+  status          String      @default("pending") // pending, paid, preparing, completed, cancelled
   stripeSessionId String?
   createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  items           OrderItem[]
 }
 
 model OrderItem {
   id         String   @id @default(cuid())
   orderId    String
-  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   menuItemId String
-  name       String   // snapshot at time of order
+  name       String
   price      Int
   quantity   Int
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
 }
 
 model Reservation {
@@ -45,26 +49,41 @@ model Reservation {
   name      String
   email     String
   phone     String
-  partySize Int
-  date      DateTime
+  date      String
   time      String
-  notes     String?
-  status    String   @default("pending") // pending | confirmed | cancelled
+  guests    Int
+  status    String   @default("confirmed") // pending, confirmed, cancelled
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model ContactMessage {
   id        String   @id @default(cuid())
   name      String
   email     String
-  type      String   // reservation | private-event | general
   message   String
-  isRead    Boolean  @default(false)
+  read      Boolean  @default(false)
   createdAt DateTime @default(now())
 }
 
 model Admin {
-  id       String @id @default(cuid())
-  email    String @unique
-  password String // hashed with bcrypt
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+}
+
+model Customer {
+  id           String    @id @default(cuid())
+  mobile       String    @unique
+  firstName    String?
+  lastName     String?
+  email        String?
+  birthDate    String?
+  referralCode String?
+  stars        Int       @default(120)
+  cardBalance  Float     @default(0.0)
+  otpCode      String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }

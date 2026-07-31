@@ -40,11 +40,10 @@ export async function POST(req: Request) {
         name: validated.name,
         email: validated.email,
         phone: validated.phone,
-        partySize: validated.partySize,
-        date: new Date(validated.date),
+        date: String(validated.date),
         time: validated.time,
-        notes: validated.notes || null,
-        status: "pending",
+        guests: Number((validated as any).guests || validated.partySize || 2),
+        status: "confirmed",
       },
     });
 
@@ -59,7 +58,7 @@ export async function POST(req: Request) {
         year: "numeric",
       }),
       time: reservation.time,
-      partySize: reservation.partySize,
+      partySize: (reservation as any).guests || 2,
       reservationId: reservation.id,
     });
 
