@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: "Brew Haven Menu — Signature drinks, artisan sourdough, and gourmet cafe selections.",
 };
 
-export const revalidate = 30; // Revalidate DB data every 30 seconds
+export const dynamic = "force-dynamic";
 
 export const DEFAULT_MENU_ITEMS = [
   // DRINKS
