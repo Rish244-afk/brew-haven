@@ -1,23 +1,22 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Sparkles, Coffee, Flame, ShieldCheck } from "lucide-react";
-import { prisma } from "@/lib/prisma";
+import { prisma, safeDbQuery } from "@/lib/prisma";
 import { AddToCartButton } from "@/components/AddToCartButton";
 
 export const revalidate = 60; // Revalidate every minute
 
 export default async function HomePage() {
-  // Fetch featured items for home page teaser
-  let featuredItems: any[] = [];
-  try {
-    featuredItems = await prisma.menuItem.findMany({
-      take: 3,
-      where: { available: true },
-      orderBy: { createdAt: "desc" },
-    });
-  } catch (err) {
-    console.error("Error loading featured items for homepage:", err);
-  }
+  // Fetch featured items for home page teaser safely
+  const featuredItems = await safeDbQuery(
+    () =>
+      prisma.menuItem.findMany({
+        take: 3,
+        where: { available: true },
+        orderBy: { createdAt: "desc" },
+      }),
+    []
+  );
 
   return (
     <div className="overflow-hidden">

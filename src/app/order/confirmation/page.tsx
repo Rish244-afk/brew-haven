@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { CheckCircle2, AlertCircle, ShoppingBag, ArrowRight } from "lucide-react";
-import { prisma } from "@/lib/prisma";
+import { prisma, safeDbQuery } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
 
 export const metadata: Metadata = {
@@ -33,10 +33,14 @@ export default async function OrderConfirmationPage({
 
   // 1. Verify payment status server-side
   let isPaymentVerified = false;
-  let order = await prisma.order.findFirst({
-    where: { stripeSessionId: sessionId },
-    include: { items: true },
-  });
+  let order = await safeDbQuery(
+    () =>
+      prisma.order.findFirst({
+        where: { stripeSessionId: sessionId },
+        include: { items: true },
+      }),
+    null
+  );
 
   if (stripe && sessionId && !sessionId.startsWith("mock_session_")) {
     try {

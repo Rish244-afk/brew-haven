@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
+import { prisma, safeDbQuery } from "@/lib/prisma";
 import { MenuGrid } from "@/components/MenuGrid";
 
 export const metadata: Metadata = {
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export const DEFAULT_MENU_ITEMS = [
+const DEFAULT_MENU_ITEMS = [
   // DRINKS
   {
     id: "item-1",
@@ -181,16 +181,11 @@ export const DEFAULT_MENU_ITEMS = [
 ];
 
 export default async function MenuPage() {
-  let dbMenuItems: any[] = [];
-  try {
-    dbMenuItems = await prisma.menuItem.findMany({
-      orderBy: { createdAt: "asc" },
-    });
-  } catch (error) {
-    console.error("Error fetching menu items from database:", error);
-  }
+  const dbMenuItems = await safeDbQuery(
+    () => prisma.menuItem.findMany({ orderBy: { createdAt: "asc" } }),
+    []
+  );
 
-  // Use database items if populated; otherwise default to curated Starbucks/Zomato menu items
   const menuItems = dbMenuItems.length > 0 ? dbMenuItems : DEFAULT_MENU_ITEMS;
 
   return (
