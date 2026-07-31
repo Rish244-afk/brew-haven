@@ -13,6 +13,10 @@ import {
   Lock,
   ArrowRight,
   ShoppingBag,
+  Copy,
+  Check,
+  Smartphone,
+  ShieldCheck,
 } from "lucide-react";
 import { useCartStore } from "@/lib/cart-store";
 
@@ -20,12 +24,20 @@ export default function CheckoutPage() {
   const { items, getTotalAmount, clearCart } = useCartStore();
 
   const [fulfillmentType, setFulfillmentType] = useState<"pickup" | "delivery">("pickup");
-  const [paymentMethod, setPaymentMethod] = useState<"card" | "upi" | "cod">("card");
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "upi" | "cod">("upi");
 
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+
+  // UPI Specific State
+  const [upiIdInput, setUpiIdInput] = useState(
+    process.env.NEXT_PUBLIC_UPI_ID || "brewhaven@okicici"
+  );
+  const [utrRef, setUtrRef] = useState("");
+  const [copiedUpi, setCopiedUpi] = useState(false);
+  const [showUpiModal, setShowUpiModal] = useState(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -38,7 +50,21 @@ export default function CheckoutPage() {
   const formattedDelivery = (deliveryFeeCents / 100).toFixed(2);
   const formattedGrandTotal = (grandTotalCents / 100).toFixed(2);
 
-  const handleSubmitOrder = async (e: React.FormEvent) => {
+  // Generate dynamic QR Code URL using QRServer API
+  const upiPayString = `upi://pay?pa=${encodeURIComponent(
+    upiIdInput
+  )}&pn=Brew%20Haven%20Cafe&am=${formattedGrandTotal}&cu=USD`;
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(
+    upiPayString
+  )}&color=2a1f14&bgcolor=fdfaf5`;
+
+  const copyUpiToClipboard = () => {
+    navigator.clipboard.writeText(upiIdInput);
+    setCopiedUpi(true);
+    setTimeout(() => setCopiedUpi(false), 2000);
+  };
+
+  const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!customerName.trim() || !customerEmail.trim()) {
       setErrorMsg("Please enter your name and email address.");
@@ -50,6 +76,17 @@ export default function CheckoutPage() {
       return;
     }
 
+    // If UPI selected, pop up the QR Code Payment Modal first!
+    if (paymentMethod === "upi") {
+      setShowUpiModal(true);
+      return;
+    }
+
+    // Otherwise proceed directly
+    executeOrderSubmission();
+  };
+
+  const executeOrderSubmission = async () => {
     setIsSubmitting(true);
     setErrorMsg("");
 
@@ -63,6 +100,7 @@ export default function CheckoutPage() {
           paymentMethod,
           fulfillmentType,
           address: fulfillmentType === "delivery" ? address : undefined,
+          utrRef: paymentMethod === "upi" ? utrRef : undefined,
           items: items.map((i) => ({
             menuItemId: i.menuItemId,
             name: i.name,
@@ -84,8 +122,9 @@ export default function CheckoutPage() {
       }
     } catch (err: any) {
       console.error(err);
-      setErrorMsg(err.message || "Something went wrong creating your checkout session.");
+      setErrorMsg(err.message || "Something went wrong creating your order.");
       setIsSubmitting(false);
+      setShowUpiModal(false);
     }
   };
 
@@ -111,14 +150,14 @@ export default function CheckoutPage() {
       <div className="max-w-[1200px] mx-auto px-6 md:px-12">
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-14 space-y-3">
-          <div className="eyebrow justify-center">Starbucks Style Checkout</div>
+          <div className="eyebrow justify-center">Starbucks & Zomato Checkout</div>
           <h1 className="font-serif text-4xl md:text-5xl text-espresso font-light">
             Payment & <em className="italic text-latte">Order Details</em>
           </h1>
           <div className="w-12 h-[1px] bg-latte mx-auto" />
         </div>
 
-        <form onSubmit={handleSubmitOrder} className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <form onSubmit={handleFormSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           {/* Left Column: Contact, Fulfillment & Payment Options */}
           <div className="lg:col-span-7 space-y-8">
             {/* 1. Fulfillment Option (Pickup vs Delivery) */}
@@ -232,17 +271,42 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* 3. Payment Method Selection (Starbucks / Zomato Style) */}
+            {/* 3. Payment Method Selection */}
             <div className="bg-white border border-latte/20 shadow-sm p-6 md:p-8 space-y-5">
               <h2 className="font-serif text-2xl text-espresso flex items-center justify-between border-b border-latte/15 pb-3">
-                <span>3. Select Payment Method</span>
+                <span>3. Select Payment Option</span>
                 <span className="text-xs text-mid font-sans flex items-center gap-1">
-                  <Lock className="w-3.5 h-3.5 text-latte" /> 256-Bit SSL Encrypted
+                  <Lock className="w-3.5 h-3.5 text-latte" /> 256-Bit SSL Secured
                 </span>
               </h2>
 
               <div className="space-y-3 font-sans">
-                {/* Method 1: Credit/Debit Card */}
+                {/* Method 1: UPI / QR Code Scanning (Highlighted default) */}
+                <div
+                  onClick={() => setPaymentMethod("upi")}
+                  className={`p-4 border cursor-pointer transition-all flex items-start gap-4 ${
+                    paymentMethod === "upi"
+                      ? "border-latte bg-espresso text-cream shadow-luxury"
+                      : "border-espresso/20 text-espresso bg-cream/30 hover:border-espresso"
+                  }`}
+                >
+                  <QrCode className="w-6 h-6 text-latte shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-serif text-xl font-normal">
+                        UPI QR Code / GPay / PhonePe / Paytm
+                      </h3>
+                      <span className="text-[0.65rem] uppercase tracking-wider bg-latte text-dark font-semibold px-2 py-0.5">
+                        Scan & Pay
+                      </span>
+                    </div>
+                    <p className="text-xs text-cream/70 mt-1 font-light">
+                      Instant QR Code payment via Google Pay, PhonePe, Paytm, BHIM, or any UPI app.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Method 2: Credit/Debit Card */}
                 <div
                   onClick={() => setPaymentMethod("card")}
                   className={`p-4 border cursor-pointer transition-all flex items-start gap-4 ${
@@ -261,29 +325,6 @@ export default function CheckoutPage() {
                     </div>
                     <p className="text-xs text-cream/70 mt-1 font-light">
                       Pay securely with Visa, Mastercard, American Express, or Discover.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Method 2: UPI / QR Code */}
-                <div
-                  onClick={() => setPaymentMethod("upi")}
-                  className={`p-4 border cursor-pointer transition-all flex items-start gap-4 ${
-                    paymentMethod === "upi"
-                      ? "border-latte bg-espresso text-cream shadow-luxury"
-                      : "border-espresso/20 text-espresso bg-cream/30 hover:border-espresso"
-                  }`}
-                >
-                  <QrCode className="w-6 h-6 text-latte shrink-0 mt-0.5" />
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-serif text-xl font-normal">UPI / Google Pay / PhonePe</h3>
-                      <span className="text-[0.65rem] uppercase tracking-wider text-latte font-mono">
-                        Razorpay / Instant QR
-                      </span>
-                    </div>
-                    <p className="text-xs text-cream/70 mt-1 font-light">
-                      Instant mobile wallet & QR code scanning payment.
                     </p>
                   </div>
                 </div>
@@ -318,7 +359,7 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* Right Column: Order Items Breakdown & Complete Order CTA */}
+          {/* Right Column: Order Items Breakdown & Place Order Button */}
           <div className="lg:col-span-5 space-y-6">
             <div className="bg-espresso text-cream p-6 md:p-8 border border-latte/20 shadow-luxury space-y-6 sticky top-24">
               <h2 className="font-serif text-2xl text-cream pb-4 border-b border-latte/20 flex items-center justify-between">
@@ -383,11 +424,11 @@ export default function CheckoutPage() {
                 ) : (
                   <>
                     <span>
-                      {paymentMethod === "card"
-                        ? "Proceed to Pay $" + formattedGrandTotal
-                        : paymentMethod === "upi"
-                        ? "Pay via UPI $" + formattedGrandTotal
-                        : "Confirm Cash Order $" + formattedGrandTotal}
+                      {paymentMethod === "upi"
+                        ? "Scan & Pay via UPI QR ($" + formattedGrandTotal + ")"
+                        : paymentMethod === "card"
+                        ? "Proceed to Card Pay ($" + formattedGrandTotal + ")"
+                        : "Confirm Cash Order ($" + formattedGrandTotal + ")"}
                     </span>
                     <ArrowRight className="w-4 h-4" />
                   </>
@@ -397,6 +438,96 @@ export default function CheckoutPage() {
           </div>
         </form>
       </div>
+
+      {/* ── UPI QR CODE PAYMENT MODAL ── */}
+      {showUpiModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark/80 backdrop-blur-md">
+          <div className="bg-[#1A1208] border border-latte/30 shadow-2xl max-w-md w-full p-6 md:p-8 text-cream space-y-6 relative animate-in fade-in zoom-in duration-300">
+            {/* Modal Header */}
+            <div className="text-center border-b border-latte/20 pb-4">
+              <div className="w-12 h-12 bg-latte/10 rounded-full border border-latte/30 flex items-center justify-center text-latte mx-auto mb-2">
+                <QrCode className="w-6 h-6" />
+              </div>
+              <h2 className="font-serif text-2xl text-cream font-normal">Scan UPI QR Code</h2>
+              <p className="text-[0.7rem] text-latte font-mono uppercase tracking-widest mt-1">
+                Brew Haven Cafe Payment
+              </p>
+            </div>
+
+            {/* Generated QR Code Image */}
+            <div className="bg-white p-4 max-w-[220px] mx-auto border-2 border-latte shadow-luxury text-center space-y-2">
+              <img
+                src={qrCodeUrl}
+                alt="Brew Haven UPI Payment QR Code"
+                className="w-full h-auto object-contain mx-auto"
+              />
+              <p className="text-[0.65rem] text-espresso font-mono uppercase tracking-wider font-semibold">
+                Amount: ${formattedGrandTotal}
+              </p>
+            </div>
+
+            {/* Copy UPI ID Section */}
+            <div className="bg-espresso p-3 border border-latte/20 font-sans text-xs space-y-2">
+              <div className="flex items-center justify-between text-cream/70 text-[0.65rem] uppercase tracking-wider">
+                <span>Official Cafe UPI VPA ID</span>
+                <span className="text-latte font-mono">GPay / PhonePe / Paytm</span>
+              </div>
+              <div className="flex items-center justify-between bg-dark p-2 border border-latte/30">
+                <span className="font-mono text-latte font-semibold text-sm">{upiIdInput}</span>
+                <button
+                  type="button"
+                  onClick={copyUpiToClipboard}
+                  className="px-2 py-1 bg-latte/20 text-latte hover:bg-latte hover:text-dark transition-all text-[0.65rem] flex items-center gap-1 uppercase"
+                >
+                  {copiedUpi ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                  <span>{copiedUpi ? "Copied" : "Copy ID"}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Optional UTR / Reference ID Field */}
+            <div className="font-sans space-y-2 text-xs">
+              <label className="block text-[0.65rem] uppercase tracking-wider text-latte">
+                Payment UTR / Transaction Ref ID (Optional)
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. 421098765432 or GPay Ref"
+                value={utrRef}
+                onChange={(e) => setUtrRef(e.target.value)}
+                className="w-full bg-dark border border-latte/30 p-2.5 text-cream focus:outline-none focus:border-latte font-mono"
+              />
+            </div>
+
+            {/* Modal Actions */}
+            <div className="space-y-3 pt-2">
+              <button
+                type="button"
+                onClick={executeOrderSubmission}
+                disabled={isSubmitting}
+                className="w-full font-sans text-[0.75rem] tracking-[0.2em] uppercase bg-latte text-dark font-semibold py-4 hover:bg-[#e6c88b] transition-all flex items-center justify-center gap-2 shadow-gold disabled:opacity-50"
+              >
+                {isSubmitting ? (
+                  "Verifying Payment..."
+                ) : (
+                  <>
+                    <ShieldCheck className="w-4 h-4" />
+                    <span>I Have Paid — Confirm Order</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowUpiModal(false)}
+                className="w-full text-center text-xs text-cream/50 hover:text-cream py-1 font-sans uppercase tracking-wider"
+              >
+                Change Payment Method
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
