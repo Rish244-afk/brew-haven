@@ -3,13 +3,14 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ShoppingBag, Menu as MenuIcon, X } from "lucide-react";
+import { ShoppingBag, Search, Menu as MenuIcon, X, Sparkles } from "lucide-react";
 import { useCartStore } from "@/lib/cart-store";
 
 export function Navbar() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { toggleCart, getTotalCount } = useCartStore();
   const cartItemCount = getTotalCount();
@@ -26,60 +27,91 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu on page transition
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
 
   const navLinks = [
     { name: "Home", href: "/" },
-    { name: "Menu", href: "/menu" },
-    { name: "Our Story", href: "/about" },
-    { name: "Contact", href: "/contact" },
+    { name: "Order", href: "/menu" },
+    { name: "Gift", href: "/about" },
+    { name: "Pay", href: "/checkout" },
+    { name: "Store", href: "/contact" },
   ];
 
   const isAdminRoute = pathname.startsWith("/admin");
-
-  if (isAdminRoute) return null; // Admin has its own sidebar layout
+  if (isAdminRoute) return null;
 
   return (
     <>
+      {/* Starbucks Top Rewards Banner */}
+      <div className="bg-[#103E2E] text-cream text-[0.72rem] font-sans py-2 px-6 flex items-center justify-between z-50 relative border-b border-latte/20">
+        <div className="max-w-[1200px] w-full mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-2 text-latte">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span className="text-cream font-light">
+              Sign in to <strong className="text-latte font-medium">Earn Haven Stars</strong> on every order
+            </span>
+          </div>
+          <Link
+            href="/about"
+            className="bg-cream/10 hover:bg-latte hover:text-dark text-cream border border-cream/20 px-3 py-0.5 rounded-full text-[0.65rem] tracking-wider uppercase transition-all"
+          >
+            Know More
+          </Link>
+        </div>
+      </div>
+
+      {/* Main Starbucks Navbar */}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 h-[72px] flex items-center ${
+        className={`sticky top-0 left-0 right-0 z-40 transition-all duration-300 ${
           scrolled || mobileMenuOpen
             ? "bg-[#1A1208]/95 backdrop-blur-md border-b border-[#C9A96E]/20 shadow-lg"
-            : "bg-gradient-to-b from-[#1A1208]/80 to-transparent"
+            : "bg-[#1A1208] border-b border-latte/15"
         }`}
       >
-        <div className="max-w-[1200px] w-full mx-auto px-6 md:px-12 flex items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="font-serif text-2xl font-normal tracking-wide text-cream">
-            Brew<span className="text-latte">Haven</span>
-          </Link>
+        <div className="max-w-[1200px] w-full mx-auto px-6 md:px-12 py-3.5 flex items-center justify-between gap-6">
+          {/* Logo & Links */}
+          <div className="flex items-center gap-10">
+            <Link href="/" className="font-serif text-2xl font-normal tracking-wide text-cream shrink-0">
+              Brew<span className="text-latte">Haven</span>
+            </Link>
 
-          {/* Desktop Nav Links */}
-          <nav className="hidden md:flex items-center gap-10">
-            {navLinks.map((link) => {
-              const isActive = pathname === link.href;
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`text-[0.72rem] tracking-[0.18em] uppercase transition-colors duration-300 relative py-1 ${
-                    isActive ? "text-cream font-medium" : "text-cream/70 hover:text-cream"
-                  }`}
-                >
-                  {link.name}
-                  {isActive && (
-                    <span className="absolute bottom-0 left-0 w-full h-[1px] bg-latte" />
-                  )}
-                </Link>
-              );
-            })}
-          </nav>
+            <nav className="hidden lg:flex items-center gap-8">
+              {navLinks.map((link) => {
+                const isActive = pathname === link.href;
+                return (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    className={`text-[0.72rem] tracking-[0.18em] uppercase transition-colors duration-300 relative py-1 ${
+                      isActive ? "text-latte font-medium" : "text-cream/80 hover:text-cream"
+                    }`}
+                  >
+                    {link.name}
+                    {isActive && (
+                      <span className="absolute bottom-0 left-0 w-full h-[2px] bg-latte" />
+                    )}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
 
-          {/* Actions: Cart & Reserve */}
-          <div className="flex items-center gap-5">
+          {/* Starbucks Search Bar & Actions */}
+          <div className="flex items-center gap-4">
+            {/* Starbucks Style Search Input */}
+            <div className="hidden sm:flex items-center bg-dark/80 border border-latte/30 rounded-full px-4 py-1.5 w-60 md:w-72 text-xs text-cream focus-within:border-latte transition-all">
+              <Search className="w-3.5 h-3.5 text-latte mr-2 shrink-0" />
+              <input
+                type="text"
+                placeholder="Looking for something specific?"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="bg-transparent text-cream placeholder-cream/40 focus:outline-none w-full text-[0.75rem]"
+              />
+            </div>
+
             {/* Cart Button */}
             <button
               onClick={toggleCart}
@@ -97,15 +129,15 @@ export function Navbar() {
             {/* Reserve Table Button */}
             <Link
               href="/contact?tab=reservation"
-              className="hidden sm:inline-block font-sans text-[0.68rem] tracking-[0.2em] uppercase text-latte border border-latte/40 px-5 py-2 hover:bg-latte hover:text-dark hover:border-latte transition-all duration-300"
+              className="hidden md:inline-block font-sans text-[0.68rem] tracking-[0.2em] uppercase text-latte border border-latte/40 px-4 py-2 rounded-full hover:bg-latte hover:text-dark transition-all duration-300"
             >
-              Reserve a Table
+              Reserve Table
             </Link>
 
             {/* Mobile Menu Toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden text-cream p-2 focus:outline-none"
+              className="lg:hidden text-cream p-2 focus:outline-none"
               aria-label="Toggle navigation menu"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <MenuIcon className="w-6 h-6" />}
@@ -114,15 +146,15 @@ export function Navbar() {
         </div>
       </header>
 
-      {/* Mobile Drawer */}
+      {/* Mobile Nav Drawer */}
       <div
-        className={`fixed inset-0 bg-[#1A1208] z-40 flex flex-col items-center justify-center gap-8 transition-opacity duration-400 md:hidden ${
+        className={`fixed inset-0 bg-[#1A1208] z-30 flex flex-col items-center justify-center gap-6 transition-opacity duration-300 lg:hidden ${
           mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
       >
         {navLinks.map((link) => (
           <Link
-            key={link.href}
+            key={link.name}
             href={link.href}
             className="font-serif text-3xl text-cream hover:text-latte transition-colors tracking-wide"
           >
@@ -131,7 +163,7 @@ export function Navbar() {
         ))}
         <Link
           href="/contact?tab=reservation"
-          className="mt-4 font-sans text-[0.75rem] tracking-[0.2em] uppercase text-latte border border-latte px-8 py-3.5"
+          className="mt-4 font-sans text-[0.75rem] tracking-[0.2em] uppercase text-latte border border-latte px-8 py-3 rounded-full"
         >
           Reserve a Table
         </Link>

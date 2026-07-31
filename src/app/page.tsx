@@ -1,8 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Sparkles, Coffee, Flame, ShieldCheck } from "lucide-react";
 import { prisma, safeDbQuery } from "@/lib/prisma";
 import { AddToCartButton } from "@/components/AddToCartButton";
+import { HandcraftedCurations } from "@/components/HandcraftedCurations";
+import { PromoCarousel } from "@/components/PromoCarousel";
 
 export const revalidate = 60; // Revalidate every minute
 
@@ -19,8 +20,14 @@ export default async function HomePage() {
   );
 
   return (
-    <div className="overflow-hidden">
-      {/* ── 1. HERO SECTION ── */}
+    <div className="overflow-hidden bg-cream">
+      {/* ── 1. STARBUCKS PROMOTIONAL SLIDER CAROUSEL BANNER ── */}
+      <PromoCarousel />
+
+      {/* ── 2. HANDCRAFTED CURATIONS (CIRCULAR QUICK CATEGORIES) ── */}
+      <HandcraftedCurations />
+
+      {/* ── 3. HERO SECTION ── */}
       <section className="relative h-screen min-h-[640px] flex items-end justify-start overflow-hidden">
         {/* Background Image */}
         <div
@@ -68,7 +75,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── 2. INTRO STATS STRIP ── */}
+      {/* ── 4. INTRO STATS STRIP ── */}
       <section className="bg-espresso py-16 border-y border-latte/15">
         <div className="max-w-[1200px] mx-auto px-6 md:px-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-0 text-center divide-y md:divide-y-0 md:divide-x divide-latte/20">
@@ -94,7 +101,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── 3. STORY TEASER ── */}
+      {/* ── 5. STORY TEASER ── */}
       <section className="py-24 md:py-36 bg-cream">
         <div className="max-w-[1200px] mx-auto px-6 md:px-12">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
@@ -135,7 +142,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── 4. PHILOSOPHY & FEATURES ── */}
+      {/* ── 6. PHILOSOPHY & FEATURES ── */}
       <section className="py-24 bg-parchment border-t border-latte/15">
         <div className="max-w-[1200px] mx-auto px-6 md:px-12">
           <div className="text-center max-w-xl mx-auto mb-16 space-y-4">
@@ -177,61 +184,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── 5. FEATURED MENU SELECTIONS ── */}
-      {featuredItems.length > 0 && (
-        <section className="py-24 bg-cream">
-          <div className="max-w-[1200px] mx-auto px-6 md:px-12">
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
-              <div>
-                <div className="eyebrow eyebrow-line mb-3">Curated Selection</div>
-                <h2 className="font-serif text-4xl md:text-5xl text-espresso font-normal">
-                  Featured <em className="italic text-latte">Creations</em>
-                </h2>
-              </div>
-              <Link href="/menu" className="btn-luxury btn-dark self-start md:self-auto">
-                <span>View Full Menu</span>
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {featuredItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-white border border-latte/20 overflow-hidden shadow-sm hover:shadow-luxury transition-all duration-300 flex flex-col justify-between"
-                >
-                  <div>
-                    {item.imageUrl && (
-                      <div className="relative h-56 w-full overflow-hidden bg-espresso">
-                        <Image
-                          src={item.imageUrl}
-                          alt={item.name}
-                          fill
-                          className="object-cover hover:scale-105 transition-transform duration-500"
-                        />
-                      </div>
-                    )}
-                    <div className="p-6">
-                      <div className="flex items-baseline justify-between mb-2">
-                        <h3 className="font-serif text-2xl text-espresso">{item.name}</h3>
-                        <span className="font-mono text-latte text-lg">
-                          ${(item.price / 100).toFixed(2)}
-                        </span>
-                      </div>
-                      <p className="text-xs text-mid leading-relaxed mb-4">{item.description}</p>
-                    </div>
-                  </div>
-
-                  <div className="p-6 pt-0">
-                    <AddToCartButton item={item} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ── 6. TABLE RESERVATION CTA BANNER ── */}
+      {/* ── 7. TABLE RESERVATION CTA BANNER ── */}
       <section className="relative py-28 bg-dark text-center overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center opacity-10"
