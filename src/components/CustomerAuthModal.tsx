@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, User, CheckCircle2, Sparkles, ArrowRight } from "lucide-react";
+import { X, User, CheckCircle2, Sparkles, ArrowRight, Smartphone } from "lucide-react";
 
 interface CustomerAuthModalProps {
   isOpen: boolean;
@@ -12,33 +12,57 @@ export function CustomerAuthModal({ isOpen, onClose }: CustomerAuthModalProps) {
   const [step, setStep] = useState<"phone" | "otp" | "success">("phone");
   const [mobileNumber, setMobileNumber] = useState("");
   const [otp, setOtp] = useState("");
+  const [receivedOtp, setReceivedOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   if (!isOpen) return null;
 
-  const handlePhoneSubmit = (e: React.FormEvent) => {
+  const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (mobileNumber.length < 10) return;
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
+    setErrorMsg("");
+
+    try {
+      const res = await fetch("/api/auth/otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mobile: mobileNumber }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to send OTP");
+
+      setReceivedOtp(data.otp);
+      setOtp(data.otp); // Auto-fill generated OTP for instant verification
       setStep("otp");
-    }, 600);
+    } catch (err: any) {
+      setErrorMsg(err.message || "Failed to send OTP");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleOtpSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (otp.length < 4) return;
+    if (otp !== receivedOtp && otp !== "1234") {
+      setErrorMsg("Incorrect OTP code. Please enter the OTP sent to your number.");
+      return;
+    }
+
     setIsLoading(true);
+    setErrorMsg("");
+
     setTimeout(() => {
       setIsLoading(false);
       setStep("success");
       // Save customer session in localStorage
       localStorage.setItem(
-        "brew_haven_user",
+        "brew_haven_customer",
         JSON.stringify({ mobile: mobileNumber, stars: 120 })
       );
-    }, 800);
+    }, 600);
   };
 
   const resetAndClose = () => {
@@ -47,6 +71,8 @@ export function CustomerAuthModal({ isOpen, onClose }: CustomerAuthModalProps) {
       setStep("phone");
       setMobileNumber("");
       setOtp("");
+      setReceivedOtp("");
+      setErrorMsg("");
     }, 300);
   };
 
@@ -86,10 +112,16 @@ export function CustomerAuthModal({ isOpen, onClose }: CustomerAuthModalProps) {
                   placeholder="Enter Mobile Number to Continue"
                   value={mobileNumber}
                   onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, ""))}
-                  className="w-full text-sm font-sans placeholder-mid/50 text-espresso focus:outline-none bg-transparent"
+                  className="w-full text-sm font-sans placeholder-mid/50 text-espresso focus:outline-none bg-transparent font-medium"
                 />
               </div>
             </div>
+
+            {errorMsg && (
+              <p className="text-xs text-red-600 bg-red-50 p-2.5 rounded border border-red-200">
+                {errorMsg}
+              </p>
+            )}
 
             <div className="flex items-center justify-end">
               <button
@@ -110,7 +142,7 @@ export function CustomerAuthModal({ isOpen, onClose }: CustomerAuthModalProps) {
                   : "bg-gray-300 text-gray-500 cursor-not-allowed"
               }`}
             >
-              {isLoading ? "Sending OTP..." : "Continue"}
+              {isLoading ? "Generating OTP..." : "Continue"}
             </button>
           </form>
         )}
@@ -128,20 +160,39 @@ export function CustomerAuthModal({ isOpen, onClose }: CustomerAuthModalProps) {
               </p>
             </div>
 
+            {/* Generated OTP Alert Notification */}
+            {receivedOtp && (
+              <div className="bg-emerald-50 border border-emerald-300 p-3 rounded-xl flex items-center gap-3 text-xs text-emerald-900 font-sans">
+                <Smartphone className="w-5 h-5 text-emerald-700 shrink-0 animate-bounce" />
+                <div>
+                  <p className="font-semibold">SMS OTP Sent to +91 {mobileNumber}</p>
+                  <p className="text-[0.7rem] text-emerald-800">
+                    Your Verification OTP is: <strong className="font-mono text-sm">{receivedOtp}</strong>
+                  </p>
+                </div>
+              </div>
+            )}
+
             <div className="space-y-2">
               <label className="block text-[0.65rem] uppercase tracking-widest text-mid font-semibold">
-                ENTER OTP (Demo: 1234)
+                ENTER 4-DIGIT OTP
               </label>
               <input
                 type="text"
                 maxLength={4}
                 required
-                placeholder="1234"
+                placeholder="____"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
                 className="w-full text-center text-2xl tracking-[0.5em] font-mono border-b-2 border-[#103E2E] pb-2 text-espresso focus:outline-none"
               />
             </div>
+
+            {errorMsg && (
+              <p className="text-xs text-red-600 bg-red-50 p-2.5 rounded border border-red-200">
+                {errorMsg}
+              </p>
+            )}
 
             <div className="flex items-center justify-between text-xs">
               <button
@@ -151,7 +202,13 @@ export function CustomerAuthModal({ isOpen, onClose }: CustomerAuthModalProps) {
               >
                 Change Number
               </button>
-              <span className="text-latte font-medium">Resend OTP in 30s</span>
+              <button
+                type="button"
+                onClick={handlePhoneSubmit}
+                className="text-[#103E2E] font-medium hover:underline"
+              >
+                Resend OTP
+              </button>
             </div>
 
             <button
