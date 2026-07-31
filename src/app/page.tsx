@@ -1,7 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { prisma, safeDbQuery } from "@/lib/prisma";
-import { AddToCartButton } from "@/components/AddToCartButton";
 import { HandcraftedCurations } from "@/components/HandcraftedCurations";
 import { PromoCarousel } from "@/components/PromoCarousel";
 
@@ -21,13 +20,7 @@ export default async function HomePage() {
 
   return (
     <div className="overflow-hidden bg-cream">
-      {/* ── 1. STARBUCKS PROMOTIONAL SLIDER CAROUSEL BANNER ── */}
-      <PromoCarousel />
-
-      {/* ── 2. HANDCRAFTED CURATIONS (CIRCULAR QUICK CATEGORIES) ── */}
-      <HandcraftedCurations />
-
-      {/* ── 3. HERO SECTION ── */}
+      {/* ── 1. HERO SECTION (AT THE VERY TOP) ── */}
       <section className="relative h-screen min-h-[640px] flex items-end justify-start overflow-hidden">
         {/* Background Image */}
         <div
@@ -74,6 +67,12 @@ export default async function HomePage() {
           <div className="w-[1px] h-12 bg-gradient-to-b from-latte to-transparent animate-pulse" />
         </div>
       </section>
+
+      {/* ── 2. STARBUCKS PROMOTIONAL SLIDER CAROUSEL BANNER ── */}
+      <PromoCarousel />
+
+      {/* ── 3. HANDCRAFTED CURATIONS (CIRCULAR QUICK CATEGORIES) ── */}
+      <HandcraftedCurations />
 
       {/* ── 4. INTRO STATS STRIP ── */}
       <section className="bg-espresso py-16 border-y border-latte/15">
