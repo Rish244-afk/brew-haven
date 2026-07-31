@@ -174,43 +174,16 @@ export function CartDrawer() {
                 </p>
               )}
 
-              <form onSubmit={handleCheckout} className="space-y-3">
-                <div>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Your Full Name"
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    className="w-full bg-dark/80 border border-latte/30 px-3 py-2 text-xs text-cream placeholder-cream/40 focus:outline-none focus:border-latte"
-                  />
-                </div>
-                <div>
-                  <input
-                    type="email"
-                    required
-                    placeholder="Email Address (for order confirmation)"
-                    value={customerEmail}
-                    onChange={(e) => setCustomerEmail(e.target.value)}
-                    className="w-full bg-dark/80 border border-latte/30 px-3 py-2 text-xs text-cream placeholder-cream/40 focus:outline-none focus:border-latte"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full font-sans text-[0.72rem] tracking-[0.2em] uppercase bg-latte text-dark font-medium py-3.5 hover:bg-[#e6c88b] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              <div className="pt-2">
+                <Link
+                  href="/checkout"
+                  onClick={closeCart}
+                  className="w-full font-sans text-[0.72rem] tracking-[0.2em] uppercase bg-latte text-dark font-medium py-3.5 hover:bg-[#e6c88b] transition-all flex items-center justify-center gap-2"
                 >
-                  {isSubmitting ? (
-                    "Processing..."
-                  ) : (
-                    <>
-                      <span>Proceed to Checkout</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </>
-                  )}
-                </button>
-              </form>
+                  <span>Proceed to Payment Options</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
             </div>
           )}
         </div>
