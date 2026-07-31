@@ -69,7 +69,7 @@ export function CustomerAuthModal({ isOpen, onClose }: CustomerAuthModalProps) {
                 Login / SignUp
               </h2>
               <p className="text-xs text-mid">
-                Enter your mobile number to earn Haven Stars & unlock exclusive cafe rewards.
+                Enter your mobile number to earn Haven Stars & unlock exclusive Brew Haven rewards.
               </p>
             </div>
 

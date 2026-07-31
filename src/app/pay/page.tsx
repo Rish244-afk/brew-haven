@@ -29,7 +29,7 @@ interface CustomerProfile {
   stars: number;
 }
 
-export default function StarbucksPayPage() {
+export default function BrewHavenPayPage() {
   const [profile, setProfile] = useState<CustomerProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -126,7 +126,7 @@ export default function StarbucksPayPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-cream flex items-center justify-center text-espresso font-serif">
-        Loading Starbucks Pay...
+        Loading Brew Haven Pay...
       </div>
     );
   }
@@ -139,7 +139,7 @@ export default function StarbucksPayPage() {
           Home
         </Link>
         <span className="mx-2">&gt;</span>
-        <span className="text-espresso font-medium">Starbucks Pay</span>
+        <span className="text-espresso font-medium">Brew Haven Pay</span>
       </div>
 
       {/* ── STEP 1 & 2: MOBILE AUTH / OTP POPUP IF NOT LOGGED IN ── */}
@@ -150,7 +150,7 @@ export default function StarbucksPayPage() {
               <div className="w-14 h-14 bg-[#103E2E]/10 rounded-full flex items-center justify-center text-[#103E2E] mx-auto">
                 <CreditCard className="w-7 h-7" />
               </div>
-              <h1 className="font-serif text-3xl font-bold text-[#103E2E]">Starbucks Pay</h1>
+              <h1 className="font-serif text-3xl font-bold text-[#103E2E]">Brew Haven Pay</h1>
               <p className="text-xs text-mid">
                 Sign in to manage your digital card, reload funds, and scan in-store.
               </p>
@@ -225,7 +225,7 @@ export default function StarbucksPayPage() {
         </div>
       )}
 
-      {/* ── STEP 3: "ONE FINAL STEP, TELL US A LITTLE ABOUT YOU" FORM (PIC 1 MATCH) ── */}
+      {/* ── STEP 3: "ONE FINAL STEP, TELL US A LITTLE ABOUT YOU" FORM ── */}
       {authStep === "profile_form" && (
         <div className="py-12 px-6 max-w-4xl mx-auto">
           {/* Step Progress Bar Header */}
@@ -325,7 +325,7 @@ export default function StarbucksPayPage() {
               <div className="bg-[#EAE0D0] p-6 rounded-2xl border border-latte/40 space-y-2">
                 <h3 className="font-serif text-lg font-bold text-[#103E2E]">Got a referral code?</h3>
                 <p className="text-xs text-espresso/70">
-                  If you have a Starbucks referral code, enter it here for a special reward.
+                  If you have a Brew Haven referral code, enter it here for a special reward.
                 </p>
                 <input
                   type="text"
@@ -349,14 +349,14 @@ export default function StarbucksPayPage() {
         </div>
       )}
 
-      {/* ── STEP 4: STARBUCKS PAY DASHBOARD (PIC 2 & PIC 3 MATCH) ── */}
+      {/* ── STEP 4: BREW HAVEN PAY DASHBOARD ── */}
       {authStep === "dashboard" && (
         <div className="space-y-12 pb-24">
           {/* Green Top Header */}
           <div className="bg-[#103E2E] text-cream py-10 px-6 md:px-12 border-b border-latte/20">
             <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
               <div>
-                <h1 className="font-serif text-3xl md:text-4xl font-bold">My Starbucks Cards</h1>
+                <h1 className="font-serif text-3xl md:text-4xl font-bold">My Brew Haven Cards</h1>
                 <p className="text-xs text-cream/70 mt-1 font-sans">
                   Signed in as{" "}
                   <strong className="text-latte font-semibold">
@@ -384,9 +384,9 @@ export default function StarbucksPayPage() {
               </div>
             </div>
 
-            {/* Cards Carousel Grid (Pic 2 Match) */}
+            {/* Cards Carousel Grid */}
             <div className="max-w-[1200px] mx-auto pt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Card 1: Active Starbucks Digital Card */}
+              {/* Card 1: Active Brew Haven Digital Card */}
               <div className="bg-white rounded-2xl overflow-hidden shadow-2xl border border-latte/30 text-espresso flex flex-col justify-between">
                 {/* Wave Banner Graphic */}
                 <div className="h-44 bg-gradient-to-r from-emerald-800 via-emerald-600 to-teal-700 p-6 flex flex-col justify-between text-cream relative">
@@ -424,13 +424,13 @@ export default function StarbucksPayPage() {
                 </div>
               </div>
 
-              {/* Card 2: Add New Starbucks Card Slot */}
+              {/* Card 2: Add New Brew Haven Card Slot */}
               <div
                 onClick={() => setShowLoadCardModal(true)}
                 className="bg-[#3D4743]/30 border-2 border-dashed border-latte/40 rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-[#3D4743]/50 transition-all text-cream min-h-[220px]"
               >
                 <h3 className="font-serif text-2xl font-bold text-cream mb-4">
-                  Add new Starbucks card
+                  Add new Brew Haven card
                 </h3>
                 <button className="bg-dark/80 hover:bg-dark text-cream border border-latte/40 px-6 py-2.5 rounded-full text-xs font-semibold uppercase tracking-wider flex items-center gap-2 transition-all">
                   <Plus className="w-4 h-4 text-latte" />
@@ -440,7 +440,7 @@ export default function StarbucksPayPage() {
             </div>
           </div>
 
-          {/* ── BARCODE SCAN SECTION (PIC 3 MATCH) ── */}
+          {/* ── BARCODE SCAN SECTION ── */}
           <section className="max-w-[1200px] mx-auto px-6 md:px-12 text-center space-y-6 py-8">
             <h2 className="font-serif text-2xl md:text-3xl font-bold text-[#103E2E]">
               Scan the Barcode and Pay at the Store
@@ -457,7 +457,7 @@ export default function StarbucksPayPage() {
             </div>
           </section>
 
-          {/* ── AVAILABLE REWARDS & OFFERS SECTION (PIC 3 MATCH) ── */}
+          {/* ── AVAILABLE REWARDS & OFFERS SECTION ── */}
           <section className="bg-parchment/40 py-12 border-t border-latte/20">
             <div className="max-w-[1200px] mx-auto px-6 md:px-12 space-y-8">
               <div className="flex items-center gap-6 border-b border-latte/20 pb-3 text-sm font-semibold">
@@ -557,9 +557,9 @@ export default function StarbucksPayPage() {
       {showLoadCardModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark/80 backdrop-blur-md">
           <div className="bg-white rounded-3xl p-8 max-w-md w-full text-espresso space-y-6 shadow-2xl">
-            <h2 className="font-serif text-2xl font-bold text-[#103E2E]">Reload Starbucks Card</h2>
+            <h2 className="font-serif text-2xl font-bold text-[#103E2E]">Reload Brew Haven Card</h2>
             <p className="text-xs text-mid">
-              Select or enter the amount you wish to reload to your primary Starbucks Card balance.
+              Select or enter the amount you wish to reload to your primary Brew Haven Card balance.
             </p>
 
             <div className="grid grid-cols-3 gap-3">
